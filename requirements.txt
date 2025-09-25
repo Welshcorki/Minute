@@ -6,3 +6,5 @@ pyannote.audio
 python-dotenv
 transformers
 accelerate
+pydub
+openai

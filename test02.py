@@ -78,13 +78,8 @@ def main():
     # OpenAI 클라이언트 초기화
     client = OpenAI(api_key=api_key)
 
-    # 2. 오디오 파일 경로를 커맨드 라인 인자로부터 받음
-    if len(sys.argv) < 2:
-        logging.error("사용법: python test02.py <오디오 파일 경로>")
-        logging.info("예시: python test02.py data/4minute.wav")
-        sys.exit(1)
-        
-    audio_path = sys.argv[1]
+    # 2. 오디오 파일 경로 설정
+    audio_path = "data/20250923_script2.wav"
 
     # 3. Whisper API로 음성 변환
     transcribed_text, duration = transcribe_audio_with_whisper(client, audio_path)

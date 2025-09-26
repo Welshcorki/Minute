@@ -70,17 +70,21 @@ def save_results(diarization_result, original_filename):
     """
     변환된 텍스트를 다양한 형식으로 파일로 저장합니다.
     """
+    # 결과 폴더 생성
+    results_dir = "results"
+    os.makedirs(results_dir, exist_ok=True)
+
     base_filename = os.path.splitext(os.path.basename(original_filename))[0]
     
     # TXT 파일로 저장
-    txt_filename = f"diarization_{base_filename}.txt"
+    txt_filename = os.path.join(results_dir, f"diarization_{base_filename}.txt")
     with open(txt_filename, "w", encoding="utf-8") as f:
         for segment in diarization_result:
             f.write(f"[{segment['start']:.2f}s - {segment['end']:.2f}s] {segment['speaker']}: {segment['text']}\n")
     logging.info(f"변환된 텍스트를 '{txt_filename}' 파일에 저장했습니다.")
 
     # JSON 파일로 저장
-    json_filename = f"diarization_{base_filename}.json"
+    json_filename = os.path.join(results_dir, f"diarization_{base_filename}.json")
     with open(json_filename, "w", encoding="utf-8") as f:
         json.dump(diarization_result, f, ensure_ascii=False, indent=4)
     logging.info(f"변환된 텍스트를 '{json_filename}' 파일에 저장했습니다.")
@@ -90,6 +94,9 @@ def main():
     """
     메인 실행 함수
     """
+    # 오디오 파일 경로 설정
+    audio_file_path = "C:/Users/SBA/github/Minute/data/20250923_script2.wav"
+
     # 1. API 키 로드
     openai_api_key, pyannote_token = load_api_keys()
     if not openai_api_key or not pyannote_token:
@@ -98,19 +105,11 @@ def main():
     # OpenAI 클라이언트 초기화
     client = OpenAI(api_key=openai_api_key)
 
-    # 2. 오디오 파일 경로를 커맨드 라인 인자로부터 받음
-    if len(sys.argv) < 2:
-        logging.error("사용법: python test03.py <오디오 파일 경로>")
-        logging.info("예시: python test03.py data/4minute.wav")
-        sys.exit(1)
-        
-    audio_path = sys.argv[1]
-
-    # 3. 화자 분리
-    diarization = diarize_audio(audio_path, pyannote_token)
+    # 2. 화자 분리
+    diarization = diarize_audio(audio_file_path, pyannote_token)
 
     if diarization:
-        audio = AudioSegment.from_wav(audio_path)
+        audio = AudioSegment.from_wav(audio_file_path)
         diarization_result = []
         
         logging.info("각 화자 세그먼트의 음성 인식을 시작합니다...")
@@ -137,9 +136,9 @@ def main():
         processing_time = end_time - start_time
         logging.info(f"모든 세그먼트 음성 인식 완료. (총 처리 시간: {processing_time:.2f}초)")
 
-        # 4. 결과 저장
+        # 3. 결과 저장
         if diarization_result:
-            save_results(diarization_result, audio_path)
+            save_results(diarization_result, audio_file_path)
 
 if __name__ == "__main__":
     main()
